@@ -61,7 +61,7 @@ Tensor Tensor_transpose(Tensor self);
 float Tensor_get(Tensor self, int i, int j, int k, int l);
 void Tensor_set(Tensor self, int i, int j, int k, int l, float value);
 void Tensor_backward(Tensor self, Tensor grad);
-int Tensor_backward_apply(Tensor self, void (*f)(Tensor, void*), void* ctx);
+int Tensor_backward_apply(Tensor self, void (*f)(Tensor, void*), void* ctx); 
 
 void Tensor_print(Tensor self);
 
@@ -134,22 +134,23 @@ typedef struct optim_rmsprop optim_rmsprop;
 typedef struct optim_adam optim_adam;
 
 //SGD - Updated with weight decay
-optim_sgd* optim_sgd_new(int n_params, Tensor* params, float lr, float momentum, float weight_decay);
+optim_sgd* optim_sgd_new(int n_params, Tensor* params, float weight_decay);
 void optim_sgd_zerograd(optim_sgd* self);
 void optim_sgd_step(optim_sgd* self);
+void optim_sgd_config(optim_sgd* self, float lr, float momentum);
 
 //AdaGrad - Updated with weight decay
-optim_adagrad* optim_adagrad_new(int n_params, Tensor* params, float lr, float eps, float weight_decay);
+optim_adagrad* optim_adagrad_new(int n_params, Tensor* params, float lr, float ε,float weight_decay);
 void optim_adagrad_zerograd(optim_adagrad* self);
 void optim_adagrad_step(optim_adagrad* self);
 
 //RMSProp - Updated with weight decay
-optim_rmsprop* optim_rmsprop_new(int n_params, Tensor* params, float lr, float alpha, float eps, float weight_decay);
+optim_rmsprop* optim_rmsprop_new(int n_params, Tensor* params, float lr, float β, float ε, float weight_decay);
 void optim_rmsprop_zerograd(optim_rmsprop* self);
 void optim_rmsprop_step(optim_rmsprop* self);
 
 //Adam - Updated with weight decay
-optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float beta1, float beta2, float eps, float weight_decay);
+optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float β1, float β2, float ε, float weight_decay);
 void optim_adam_zerograd(optim_adam* self);
 void optim_adam_step(optim_adam* self);
 
