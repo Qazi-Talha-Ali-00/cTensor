@@ -14,7 +14,7 @@ typedef struct optim_sgd {
     int n_params;
 } optim_sgd;
 
-optim_sgd* optim_sgd_new(int n_params, Tensor* params) {
+optim_sgd* optim_sgd_new(int n_params, Tensor* params, float weight_decay) {
     cten_assert(n_params >= 0, "n_params cannot be negative, but got %d.", n_params);
     if(n_params > 0) {
         cten_assert(params != NULL, "params array cannot be NULL when n_params is greater than 0.");
@@ -26,6 +26,7 @@ optim_sgd* optim_sgd_new(int n_params, Tensor* params) {
     self->lr = 0.001f;
     self->momentum = 0.0f;
     self->velocity = NULL;
+    self->weight_decay = weight_decay;
     return self;
 }
 
@@ -59,13 +60,24 @@ void optim_sgd_step(optim_sgd* self) {
                         "Velocity buffer is NULL. Did you configure momentum?");
             float* velocity_data = self->velocity[i].data->flex;
             for(int j = 0; j < t.data->numel; j++) {
-                velocity_data[j] = self->momentum * velocity_data[j] + grad_data[j];
+                float grad_val = grad_data[j];
+
+                if(self->weight_decay > 0.0f){
+                    grad_val += self->weight_decay * param_data[j];
+                }
+                velocity_data[j] = self->momentum * velocity_data[j] + grad_val;
                 param_data[j] -= self->lr * velocity_data[j];
             }
+
         } else {
             // p = p - lr * grad
             for(int j = 0; j < t.data->numel; j++) {
-                param_data[j] -= self->lr * grad_data[j];
+                float grad_val = grad_data[j];
+
+                if(self->weight_decay > 0.0f) {
+                    grad_val += self->weight_decay * param_data[j];
+                }
+                param_data[j] -= self->lr * grad_val;
             }
         }
     }
