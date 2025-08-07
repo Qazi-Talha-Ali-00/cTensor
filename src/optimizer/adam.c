@@ -19,7 +19,7 @@ typedef struct optim_adam {
 
 } optim_adam;
 
-optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float β1, float β2, float ε) {
+optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float β1, float β2, float ε, float weight_decay) {
     cten_assert(n_params >= 0, "Adam: n_params cannot be negative, but got %d.", n_params);
     if(n_params > 0) {
         cten_assert(params != NULL, "Adam: params array cannot be NULL when n_params > 0.");
@@ -37,6 +37,7 @@ optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float β1, fl
     self->β2 = β2;
     self->ε = ε;
     self->t = 0;
+    self->weight_decay = weight_decay;
 
     self->m = _cten_malloc(sizeof(Tensor) * n_params);
     self->v = _cten_malloc(sizeof(Tensor) * n_params);
@@ -61,8 +62,12 @@ void optim_adam_step(optim_adam* self) {
 
         for(int j = 0; j < p.data->numel; j++) {
             float g = grad.data->flex[j];
+            if (self->weight_decay > 0.0f){
+                g += self->weight_decay * p.data->flex[j];
+            }
             m->data->flex[j] = self->β1 * m->data->flex[j] + (1 - self->β1) * g;
             v->data->flex[j] = self->β2 * v->data->flex[j] + (1 - self->β2) * g * g;
+            
             float m_hat = m->data->flex[j] / (1 - powf(self->β1, self->t));
             float v_hat = v->data->flex[j] / (1 - powf(self->β2, self->t));
             p.data->flex[j] -= self->lr * m_hat / (sqrtf(v_hat) + self->ε);
