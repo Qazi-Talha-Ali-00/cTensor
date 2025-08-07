@@ -6,16 +6,18 @@
 #include <string.h>
 
 typedef struct optim_adagrad {
-    int n_params;
-    Tensor* params;
     float lr;
     float ε;
+    float weight_decay;
     Tensor* sum_sq_grad;
+    Tensor* params;
+    int n_params;
+
 } optim_adagrad;
 
 optim_adagrad* optim_adagrad_new(int n_params, Tensor* params, float lr, float ε) {
     cten_assert(n_params >= 0, "AdaGrad: n_params cannot be negative, but got %d.", n_params);
-    if (n_params > 0) {
+    if(n_params > 0) {
         cten_assert(params != NULL, "AdaGrad: params array cannot be NULL when n_params > 0.");
     }
     cten_assert(lr >= 0.0f, "AdaGrad: learning rate must be non-negative, but got %f.", lr);
@@ -27,25 +29,23 @@ optim_adagrad* optim_adagrad_new(int n_params, Tensor* params, float lr, float �
     self->lr = lr;
     self->ε = ε;
     self->sum_sq_grad = _cten_malloc(sizeof(Tensor) * n_params);
-    for (int i = 0; i < n_params; i++) {
+    for(int i = 0; i < n_params; i++) {
         self->sum_sq_grad[i] = Tensor_zeros(params[i].shape, false);
     }
     return self;
 }
 
-void optim_adagrad_zerograd(optim_adagrad* self) {
-    _cten_zero_grad(self->params, self->n_params);
-}
+void optim_adagrad_zerograd(optim_adagrad* self) { _cten_zero_grad(self->params, self->n_params); }
 
 void optim_adagrad_step(optim_adagrad* self) {
-    for (int i = 0; i < self->n_params; i++) {
+    for(int i = 0; i < self->n_params; i++) {
         Tensor t = self->params[i];
-        if (t.node == NULL || t.node->grad.data == NULL) continue;
+        if(t.node == NULL || t.node->grad.data == NULL) continue;
 
         Tensor grad = t.node->grad;
         Tensor* sum_sq = &self->sum_sq_grad[i];
 
-        for (int j = 0; j < t.data->numel; j++) {
+        for(int j = 0; j < t.data->numel; j++) {
             float g = grad.data->flex[j];
             sum_sq->data->flex[j] += g * g;
             t.data->flex[j] -= self->lr * g / (sqrtf(sum_sq->data->flex[j]) + self->ε);
