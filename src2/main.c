@@ -63,7 +63,7 @@ int main() {
 
     // create optimizer
     cten_begin_malloc(PoolId_Optimizer);
-    optim_sgd* optimizer = optim_sgd_new(4, (Tensor*)&model);
+    optim_sgd* optimizer = optim_sgd_new(4, (Tensor*)&model, 0.0f);
     optim_sgd_config(optimizer, 0.01f, 0.0f);
     cten_end_malloc();
 
@@ -126,7 +126,7 @@ int main() {
 
         // forward pass
         Tensor logit = Model_forward(&model, input);
-        Tensor y_pred = nn_softmax(logit);
+        Tensor y_pred = nn_softmax(logit,1);
         Tensor loss = nn_crossentropy(y_true, y_pred);
         // calculate accuracy
         int pred_classes[1];
