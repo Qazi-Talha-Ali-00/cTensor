@@ -27,6 +27,8 @@ void test_square_operator();
 void test_div_operator();
 void test_max_operator();
 void test_min_operator();
+void test_abs_operator();
+void test_softmax_operator();
 
 // Backward tests
 void test_add_backward();
@@ -41,6 +43,8 @@ void test_sum_backward();
 void test_mean_backward();
 void test_div_backward();
 void test_pow_backward();
+void test_abs_backward();
+void test_softmax_backward();
 
 int main() {
     printf("Starting cTensor Test Suite on %s...\n", PLATFORM_NAME);
@@ -110,6 +114,12 @@ int main() {
     test_min_operator();
     printf("Min operator tests finished.\n");
 
+    test_abs_operator();
+    printf("Abs operator tests finished.\n");
+
+    test_softmax_operator();
+    printf("Softmax operator tests finished.\n");
+
     // Backward tests
     test_add_backward();
     printf("Add backward tests finished.\n");
@@ -146,6 +156,13 @@ int main() {
     
     test_pow_backward();
     printf("Pow backward tests finished.\n");
+    
+    test_abs_backward();
+    printf("Abs backward tests finished.\n");
+    
+    test_softmax_backward();
+    printf("Softmax backward tests finished.\n");
+    
     // other tests
     
     csv_reporter_close();
