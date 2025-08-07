@@ -133,26 +133,32 @@ typedef struct optim_adagrad optim_adagrad;
 typedef struct optim_rmsprop optim_rmsprop;
 typedef struct optim_adam optim_adam;
 
-//SGD
-optim_sgd* optim_sgd_new(int n_params, Tensor* params);
-void optim_sgd_config(optim_sgd* self, float lr, float momentum);
+//SGD - Updated with weight decay
+optim_sgd* optim_sgd_new(int n_params, Tensor* params, float lr, float momentum, float weight_decay);
 void optim_sgd_zerograd(optim_sgd* self);
 void optim_sgd_step(optim_sgd* self);
 
-//AdaGrad
-optim_adagrad* optim_adagrad_new(int n_params, Tensor* params, float lr, float eps);
+//AdaGrad - Updated with weight decay
+optim_adagrad* optim_adagrad_new(int n_params, Tensor* params, float lr, float eps, float weight_decay);
 void optim_adagrad_zerograd(optim_adagrad* self);
 void optim_adagrad_step(optim_adagrad* self);
 
-//RMSProp
-optim_rmsprop* optim_rmsprop_new(int n_params, Tensor* params, float lr, float alpha, float eps);
+//RMSProp - Updated with weight decay
+optim_rmsprop* optim_rmsprop_new(int n_params, Tensor* params, float lr, float alpha, float eps, float weight_decay);
 void optim_rmsprop_zerograd(optim_rmsprop* self);
 void optim_rmsprop_step(optim_rmsprop* self);
 
-//Adam
-optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float beta1, float beta2, float eps);
+//Adam - Updated with weight decay
+optim_adam* optim_adam_new(int n_params, Tensor* params, float lr, float beta1, float beta2, float eps, float weight_decay);
 void optim_adam_zerograd(optim_adam* self);
 void optim_adam_step(optim_adam* self);
+
+/* Gradient Clipping */
+void cten_clip_grad_norm(Tensor* params, int n_params, float max_norm);
+void cten_clip_grad_value(Tensor* params, int n_params, float max_value);
+void cten_clip_grad_value_range(Tensor* params, int n_params, float min_value, float max_value);
+void cten_clip_grad_positive(Tensor* params, int n_params, float max_value);
+void cten_clip_grad_negative(Tensor* params, int n_params, float min_value);
 
 /* Misc */
 void cten_begin_eval();
@@ -161,7 +167,8 @@ void cten_end_eval();
 bool va_arg_is_present(va_list args);
 
 /* Utils */
-void Tensor_normalize_dataset(const float (*X)[4], float (*X_norm)[4], int n_samples, int n_train_samples, int n_features);Tensor Tensor_detach(Tensor self);
+void Tensor_normalize_dataset(const float (*X)[4], float (*X_norm)[4], int n_samples, int n_train_samples, int n_features);
+Tensor Tensor_detach(Tensor self);
 void Tensor_shuffle_dataset(const float (*X)[4], const int *y,float (*X_shuffled)[4], int *y_shuffled, int n_samples, int n_features);
 void cten_assert(bool cond, const char* fmt, ...);
 void cten_assert_shape(const char* title, TensorShape a, TensorShape b);
